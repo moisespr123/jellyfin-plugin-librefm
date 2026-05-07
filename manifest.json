@@ -12,7 +12,7 @@
                 "changelog": "Initial release.",
                 "targetAbi": "10.11.0.0",
                 "sourceUrl": "https://github.com/moisespr123/jellyfin-plugin-librefm/releases/download/10.11.0.5/librefm_10.11.0.5.zip",
-                "checksum": "33b88ce1bcb5501b62579d56d722a8e1",
+                "checksum": "ae48c2e0f03ea47d4499f5ffa57a7d28",
                 "timestamp": "2026-05-07T00:00:00Z"
             }
         ]
