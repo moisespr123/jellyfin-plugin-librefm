@@ -6,9 +6,9 @@ This repository is a fork of the Last.fm plugin maintained by [danielfariati](ht
 
 While his plugin already supports scrobbling to Last.fm, it has a limitation that it works with Last.fm or Libre.fm, but not both at the same time. Therefore, this separate plugin, when installed, will scrobble to Libre.fm.
 
-You can have both the Last.fm and Libre.fm plugins enabled to allow scrobbling to both services at the same time. Just keep the endpoint set at the default. (that is, let the Last.fm plugin only scrobble to last.fm and let the Libre.fm plugin only scrobble to libre.fm). Additionally, there is also the [ListenBrainz plugin](https://github.com/lyarenei/jellyfin-plugin-listenbrainz) if you're interested to scrobble there too.
+You can have both the Last.fm and Libre.fm plugins enabled to allow scrobbling to both services at the same time. Just keep the Last.fm endpoint set to the default. (that is, let the Last.fm plugin only scrobble to last.fm and let the Libre.fm plugin only scrobble to libre.fm). Additionally, there is also the [ListenBrainz plugin](https://github.com/lyarenei/jellyfin-plugin-listenbrainz) if you're interested to scrobble there too.
 
-This plugin only scrobbles to either libre.fm or last.fm. Metadata / album art functions have been cleaned up. Continue using the Last.fm plugin if you rely in this functionality.
+This plugin only scrobbles libre.fm. To scrobble to Last.fm and use the plugin's Metadata / album art functions, continue using the Last.fm plugin.
 
 ## 🔧 Installation and Configuration
 
@@ -48,21 +48,8 @@ If a user changes their Libre.fm password, you may need to reconfigure the plugi
   - Your clients reliably report `PlaybackStopped` events;
   - You prefer scrobbling to be triggered by the client-reported stop event rather than by Jellyfin saving user playback data;
 
-- **Advanced options**
-  - **API host:**
-
-    Allows you to specify a custom API host for Libre.fm-compatible services / APIs.
-    For example:
-    - **Libre.fm (Default):** `libre.fm`
-    - **Last.fm:** `ws.audioscrobbler.com`
-
-    If you change this value, you have to re-enter the password and save the configuration for the change to take effect, as the session key is tied to the API host.
-
-    Please note that while the plugin may work with Libre.fm-compatible services, it is primarily designed and tested against the official Libre.fm API. Compatibility with other services may vary based on how closely they adhere to the Libre.fm API specifications.
-
 ## 🛠 Troubleshooting
 
 - Missing scrobbles? Try enabling **Alternative Mode** (more details in the [Per-user Settings](#-per-user-settings) section)
 - If authentication appears broken, re-enter your Libre.fm credentials and save to generate a new session key
-- If using a custom API host (for example Libre.fm), confirm the host is correct and then re-authenticate to refresh the session key for that host
 - Check Jellyfin server logs for plugin-related messages

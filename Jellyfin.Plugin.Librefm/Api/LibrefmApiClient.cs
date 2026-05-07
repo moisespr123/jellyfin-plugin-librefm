@@ -35,7 +35,7 @@
             var request = new MobileSessionRequest
             {
                 Username = username,
-                Password = password,
+                AuthToken = BuildLegacyAuthToken(username, password),
 
                 ApiKey = Strings.Keys.LibrefmApiKey,
                 Method = Strings.Methods.GetMobileSession,
@@ -43,17 +43,6 @@
             };
 
             var response = await Post<MobileSessionRequest, MobileSessionResponse>(request);
-
-            if (ShouldRetryWithLegacyAuthToken(response))
-            {
-                _logger.LogInformation("Retrying mobile session auth with legacy authToken flow for host={Host}", Plugin.Instance?.PluginConfiguration?.LibrefmApiHost);
-
-                request.Password = null;
-                request.AuthToken = BuildLegacyAuthToken(username, password);
-                response = await Post<MobileSessionRequest, MobileSessionResponse>(request);
-            }
-
-
             return response;
         }
 
@@ -61,29 +50,6 @@
         {
             var passwordHash = Helpers.CreateMd5Hash(password).ToLowerInvariant();
             return Helpers.CreateMd5Hash(username + passwordHash).ToLowerInvariant();
-        }
-
-        private static bool ShouldRetryWithLegacyAuthToken(MobileSessionResponse response)
-        {
-            if (response == null || !response.IsError())
-            {
-                return false;
-            }
-
-            var configuredHost = Plugin.Instance?.PluginConfiguration?.LibrefmApiHost;
-            var isLibreHost = !string.IsNullOrWhiteSpace(configuredHost) && configuredHost.Contains("libre.fm", StringComparison.OrdinalIgnoreCase);
-            if (!isLibreHost)
-            {
-                return false;
-            }
-
-            if (response.ErrorCode == 6)
-            {
-                return true;
-            }
-
-            return !string.IsNullOrWhiteSpace(response.Message)
-                && response.Message.Contains("missing a required parameter", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task Scrobble(Audio item, LibrefmUser user)

@@ -12,7 +12,6 @@ namespace Jellyfin.Plugin.Librefm.Api
     {
         private readonly LibrefmApiClient _apiClient;
         private readonly ILogger<RestApi> _logger;
-        private static readonly object _apiHostLock = new();
 
         public RestApi(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
         {
@@ -25,35 +24,7 @@ namespace Jellyfin.Plugin.Librefm.Api
         public object CreateMobileSession([FromBody] LibreFMUser libreFMUser)
         {
             _logger.LogInformation("Fetching Libre.fm mobilesession auth for Username={0}", libreFMUser.Username);
-            return ExecuteWithApiHostOverride(libreFMUser.ApiHost, () => _apiClient.RequestSession(libreFMUser.Username, libreFMUser.Password).Result);
-        }
-
-        private static object ExecuteWithApiHostOverride(string apiHost, Func<object> action)
-        {
-            lock (_apiHostLock)
-            {
-                var config = Plugin.Instance?.PluginConfiguration;
-                if (config == null)
-                {
-                    return action();
-                }
-
-                var originalHost = config.LibrefmApiHost;
-
-                if (!string.IsNullOrWhiteSpace(apiHost))
-                {
-                    config.LibrefmApiHost = apiHost;
-                }
-
-                try
-                {
-                    return action();
-                }
-                finally
-                {
-                    config.LibrefmApiHost = originalHost;
-                }
-            }
+            return _apiClient.RequestSession(libreFMUser.Username, libreFMUser.Password).Result;
         }
     }
 
@@ -61,6 +32,5 @@ namespace Jellyfin.Plugin.Librefm.Api
     {
         public string Username { get; set; }
         public string Password { get; set; }
-        public string ApiHost { get; set; }
     }
 }

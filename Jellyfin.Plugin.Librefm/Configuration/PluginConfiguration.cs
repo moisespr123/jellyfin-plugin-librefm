@@ -10,7 +10,6 @@
     public class PluginConfiguration : BasePluginConfiguration
     {
         public LibrefmUser[] LibrefmUsers { get; set; }
-        public string LibrefmApiHost { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginConfiguration" /> class.
@@ -18,7 +17,6 @@
         public PluginConfiguration()
         {
             LibrefmUsers = new LibrefmUser[] { };
-            LibrefmApiHost = Strings.Endpoints.LibrefmApi;
         }
     }
 }

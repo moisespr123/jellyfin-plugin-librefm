@@ -44,7 +44,7 @@
             // Append the signature
             Helpers.AppendSignature(ref data);
 
-            var url = BuildPostUrl(request.Secure, GetApiEndpointHost());
+            var url = BuildPostUrl(request.Secure, Strings.Endpoints.LibrefmApi);
             LogRequestDiagnostics(data, url, HttpMethod.Post.Method);
             using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
             requestMessage.Content = new StringContent(SetPostData(data), Encoding.UTF8, "application/x-www-form-urlencoded");
@@ -70,7 +70,7 @@
 
         public async Task<TResponse> Get<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken) where TRequest : BaseRequest where TResponse : BaseResponse
         {
-            var url = BuildGetUrl(request.ToDictionary(), request.Secure, GetApiEndpointHost());
+            var url = BuildGetUrl(request.ToDictionary(), request.Secure, Strings.Endpoints.LibrefmApi);
             using (var response = await _httpClient.GetAsync(url, cancellationToken))
             {
                 var result = await TryDeserializeResponse<TResponse>(response, url, HttpMethod.Get.Method);
@@ -104,39 +104,6 @@
                                     endpointHost,
                                     ApiVersion
                                 );
-        }
-
-        private static string GetApiEndpointHost()
-        {
-            var configured = Plugin.Instance?.PluginConfiguration?.LibrefmApiHost;
-            return NormalizeEndpointHost(configured, Strings.Endpoints.LibrefmApi);
-        }
-
-        private static string NormalizeEndpointHost(string configured, string fallbackHost)
-        {
-            if (string.IsNullOrWhiteSpace(configured))
-            {
-                return fallbackHost;
-            }
-
-            var host = configured.Trim();
-
-            if (Uri.TryCreate(host, UriKind.Absolute, out var absoluteUri) && !string.IsNullOrWhiteSpace(absoluteUri.Host))
-            {
-                return absoluteUri.Host;
-            }
-
-            host = host.Replace("https://", string.Empty, StringComparison.OrdinalIgnoreCase)
-                       .Replace("http://", string.Empty, StringComparison.OrdinalIgnoreCase)
-                       .Trim('/');
-
-            var slashIndex = host.IndexOf('/');
-            if (slashIndex > -1)
-            {
-                host = host.Substring(0, slashIndex);
-            }
-
-            return string.IsNullOrWhiteSpace(host) ? fallbackHost : host;
         }
 
         private void LogRequestDiagnostics(Dictionary<string, string> data, string url, string method)
