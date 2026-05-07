@@ -1,51 +1,19 @@
 [
     {
-        "guid": "5e7fe7f0-b048-429e-a431-b1a7e69c930d",
-        "name": "Last.fm",
-        "description": "Scrobble Last.fm plays with Jellyfin",
-        "overview": "A plugin that scrobbles your Jellyfin music to Last.fm",
-        "owner": "danielfariati",
+        "guid": "b78cf106-4cf0-4147-807a-1846f8745f19",
+        "name": "Libre.fm",
+        "description": "Scrobble Libre.fm plays with Jellyfin",
+        "overview": "A plugin that scrobbles your Jellyfin music to Libre.fm",
+        "owner": "moisespr123",
         "category": "music",
         "versions": [
             {
                 "version": "10.11.0.5",
-                "changelog": "Allowing to change the API Host (Libre.fm support) + Masking password in config page",
+                "changelog": "Initial release.",
                 "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/danielfariati/jellyfin-plugin-lastfm/releases/download/10.11.0.5/lastfm_10.11.0.5.zip",
-                "checksum": "bf42c455fdd9f385e97e63b426b8ecdc",
-                "timestamp": "2026-03-03T17:57:04Z"
-            },
-            {
-                "version": "10.11.0.4",
-                "changelog": "Naming convention fixes",
-                "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/danielfariati/jellyfin-plugin-lastfm/releases/download/10.11.0.4/lastfm_10.11.0.4.zip",
-                "checksum": "e51d7fd951daf76ae897a2a4bd1d9381",
-                "timestamp": "2026-01-30T02:01:11Z"
-            },
-            {
-                "version": "10.11.0.3",
-                "changelog": "Fixed Jellyfin version support checks, naming consistencies and plugin ID usage",
-                "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/danielfariati/jellyfin-plugin-lastfm/releases/download/10.11.0.3/lastfm_10.11.0.3.zip",
-                "checksum": "56033d2ed692ceb2238a016378669062",
-                "timestamp": "2026-01-30T01:36:23Z"
-            },
-            {
-                "version": "10.11.0.0",
-                "changelog": "Prevent duplicate scrobbles by ignoring repeats within 15s",
-                "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/danielfariati/jellyfin-plugin-lastfm/releases/download/10.11.0.0/lastfm_10.11.0.0.zip",
-                "checksum": "4a0d75d1b029dfd536ee917a2c8d5220",
-                "timestamp": "2026-01-30T00:05:57Z"
-            },
-            {
-                "version": "10.0.0.0",
-                "changelog": "Jellyfin Last.fm build v10.0.0.0",
-                "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/jesseward/jellyfin-plugin-lastfm/releases/download/10.0.0.0/lastfm_10.0.0.0.zip",
-                "checksum": "32277a418e7cddad5c66865418091438",
-                "timestamp": "2025-10-25T20:03:04Z"
+                "sourceUrl": "https://github.com/moisespr123/jellyfin-plugin-librefm/releases/download/10.11.0.5/librefm_10.11.0.5.zip",
+                "checksum": "33b88ce1bcb5501b62579d56d722a8e1",
+                "timestamp": "2026-05-07T00:00:00Z"
             }
         ]
     }

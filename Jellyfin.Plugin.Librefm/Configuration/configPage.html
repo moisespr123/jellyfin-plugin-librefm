@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Libre.fm Scrobbler Configuration</title>
+</head>
+
+<body>
+    <div id="LibrefmScrobblerConfigurationPage" data-role="page" class="page type-interior pluginConfigurationPage"
+        data-require="emby-input,emby-button,emby-select,emby-checkbox">
+
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="LibrefmScrobblerConfigurationForm">
+                    <div class="selectContainer">
+                        <select is="emby-select" id="libreUser" name="libreUser" label="Configure Libre.fm for:"></select>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" id="libreUsername" name="libreUsername" type="text" label="Username:" />
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" id="librePassword" name="librePassword" type="password" label="Password:" />
+                    </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="libreOptionScrobble" name="libreOptionScrobble" />
+                            <span>Enable Scrobbling for this user?</span>
+                        </label>
+                    </div>
+                    <div class="checkboxContainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="libreOptionAltMode" name="libreOptionAltMode" />
+                            <span>Use alternative mode and scrobble on UserDataSaved events instead of PlaybackStopped?</span>
+                        </label>
+                    </div>
+                    <details>
+                        <summary>Advanced options</summary>
+                        <div class="inputContainer">
+                            <input is="emby-input" id="libreApiHost" name="libreApiHost" type="text" label="API host:" />
+                            <div class="fieldDescription">
+                                <p>For Libre.fm, use: libre.fm - For Libre.fm, use: ws.audioscrobbler.com</p>
+                                <p>If you change this setting, you need specify the password again, before saving, or it won't work.</p>
+                            </div>
+                        </div>
+                    </details>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+			var LibrefmScrobblerConfigurationPage = {
+			_pluginUniqueId: "b78cf106-4cf0-4147-807a-1846f8745f19",
+			_users: [],
+			_config: [],
+
+			_currentUserId: '',
+			_currentUserConfig: null,
+
+			configDefaults: {
+			Username: '',
+			SessionKey: '',
+			MediaBrowserUserId: '',
+			LibrefmApiHost: 'libre.fm',
+			Options: {
+			Scrobble: false,
+			AlternativeMode: false
+			}
+			},
+
+			$el: null,
+
+			init: function ($ctx) {
+			Dashboard.showLoadingMsg();
+
+			this.$el = $ctx;
+
+			this.$el.find('#LibrefmScrobblerConfigurationForm').on('submit', this, this.onSubmit);
+			this.$el.find('#libreUser').on('change', this, $.proxy(this.onUserChange, this));
+
+			var loadConfig = this.loadConfiguration();
+			var loadUsers = this.loadUsers().then($.proxy(this.buildUserList, this));
+
+			//When we load everything, set the current user
+			$.when(loadConfig, loadUsers).then($.proxy(function () {
+			Dashboard.hideLoadingMsg();
+
+			//Populate the inputs with the default selected user
+			this.onUserChange();
+			}, this));
+			},
+
+			loadConfiguration: function () {
+			return ApiClient.getPluginConfiguration(this._pluginUniqueId).then($.proxy(function (config) {
+			this._config = config;
+			}, this));
+			},
+
+			loadUsers: function () {
+			return ApiClient.getUsers().then($.proxy(function (users) {
+			this._users = users;
+			}, this));
+			},
+
+			saveConfiguration: function () {
+			return ApiClient.updatePluginConfiguration(this._pluginUniqueId, this._config);
+			},
+
+			buildUserList: function () {
+
+			var html = '';
+			$.each(this._users, function (i, user) {
+			html += "<option value='" + user.Id + "'>" + user.Name + "</option>";
+			});
+
+			document.getElementById('libreUser').innerHTML = html;
+
+			},
+
+			populateInputs: function (userData) {
+			var data = $.extend({}, this.configDefaults, userData);
+
+			this.$el.find('#libreApiHost').val(this._config.LibrefmApiHost || this.configDefaults.LibrefmApiHost);
+			this.$el.find('#libreUsername').val(data.Username);
+			this.$el.find('#librePassword').val(data.SessionKey);
+			this.$el.find('#libreOptionScrobble').prop('checked', data.Options.Scrobble);
+			this.$el.find('#libreOptionAltMode').prop('checked', data.Options.AlternativeMode);
+
+			// Don't forget to call checkboxradio('refresh') otherwise the UI wont update
+			},
+
+			save: function (libreUsername, password) {
+			var userConfig = this.getCurrentSelectedUser();
+			var previousApiHost = this._config.LibrefmApiHost || this.configDefaults.LibrefmApiHost;
+			var newApiHost = this.$el.find('#libreApiHost').val() || this.configDefaults.LibrefmApiHost;
+			var apiHostChanged = (previousApiHost || '').trim().toLowerCase() !== (newApiHost || '').trim().toLowerCase();
+
+			this._config.LibrefmApiHost = newApiHost;
+
+			if (!username && !password) {
+                        this.doSave();
+                        return;
+                    }
+
+                    //If the config for the user doesn't exist, create one
+                    if (!userConfig) {
+                        userConfig = $.extend({}, this.configDefaults, { MediaBrowserUserId: this.getCurrentSelectedUserId() });
+
+                        this._config.LibrefmUsers.push(userConfig);
+                    }
+
+                    //Attach current option settings to
+                    userConfig.Options = this.getUIOptionsValues();
+
+                    Dashboard.showLoadingMsg();
+
+
+                    //Dont try and login again if the password field is still the SessionKey
+                    if (userConfig.SessionKey == password && !apiHostChanged) {
+                        this.doSave();
+
+                        return;
+                    }
+
+                    //Get session with user data
+                    ApiClient.LibrefmGetMobileSession(username, password, this._config.LibrefmApiHost).then($.proxy(function (data) {
+                        //Check if we have data
+                        if (data && data.session) {
+
+                            userConfig.Username = data.session.name;
+                            userConfig.SessionKey = data.session.key;
+
+                            //Save
+                            this.doSave();
+
+                            return;
+                        }
+
+                        Dashboard.alert(data.message || "Something went wrong");
+                        console.log(data.message);
+                    }, this));
+                    Dashboard.hideLoadingMsg();
+                },
+
+                doSave: function () {
+                    return this.saveConfiguration().then($.proxy(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+
+                        this.onUserChange();
+                    }, this));
+                },
+
+                getCurrentSelectedUserId: function () {
+                    return this.$el.find('#libreUser').val();
+                },
+
+                getCurrentSelectedUser: function () {
+                    //Get the current user
+                    var currentUserId = this.getCurrentSelectedUserId();
+
+                    var currentUser = this._config.LibrefmUsers.filter(function (user) {
+                        return user.MediaBrowserUserId == currentUserId;
+                    })[0];
+
+                    return currentUser;
+                },
+
+                getSelectedMBUser: function () {
+                    //Get the current user
+                    var currentUserId = this.getCurrentSelectedUserId();
+
+                    var currentUser = this._users.filter(function (user) {
+                        return user.Id == currentUserId;
+                    })[0];
+
+                    return currentUser;
+                },
+
+                //Will return an options object with the current UI settings
+
+                getUIOptionsValues: function () {
+                    var options = $.extend({}, this.configDefaults.Options);
+
+                    options.Scrobble = this.$el.find('#libreOptionScrobble').prop('checked');
+                    options.AlternativeMode = this.$el.find('#libreOptionAltMode').prop('checked');
+                    return options;
+                },
+
+                onUserChange: function () {
+                    var currentUser = this.getCurrentSelectedUser();
+
+                    this.populateInputs(currentUser);
+                },
+
+                onSubmit: function (e) {
+                    e.preventDefault();
+
+                    var self = e.data;
+
+                    var username = $(this).find("#libreUsername").val();
+                    var password = $(this).find("#librePassword").val();
+
+                    //Load the config again in case another user has updated their Librefm info
+                    self.loadConfiguration().then(function () {
+                        self.save(username, password);
+                    });
+                },
+
+            };
+
+            $('#LibrefmScrobblerConfigurationPage').on('pageshow', function () {
+                LibrefmScrobblerConfigurationPage.init($(this));
+            });
+
+            //Add my own methods to the api client
+            ApiClient.LibrefmGetMobileSession = function (username, password, apiHost) {
+                if (!username) throw new Error("no username");
+
+                if (!password) throw new Error("no password");
+
+                var url = this.getUrl("Librefm/Login");
+
+                var data = {
+                    username: username,
+                    password: password,
+                    apiHost: apiHost
+                };
+
+                return this.ajax({
+                    type: "POST",
+                    url: url,
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: 'json'
+                });
+            };</script>
+    </div>
+</body>
+
+</html>

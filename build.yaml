@@ -1,15 +1,15 @@
 ---
-name: "Last.fm"
-guid: "5e7fe7f0-b048-429e-a431-b1a7e69c930d"
+name: "Libre.fm"
+guid: "b78cf106-4cf0-4147-807a-1846f8745f19"
 version: "10.11.0.5"
 targetAbi: "10.11.0.5"
 framework: "net9.0"
-overview: "A plugin that scrobbles your Jellyfin music to Last.fm"
+overview: "A plugin that scrobbles your Jellyfin music to Libre.fm"
 description: >
-  Scrobble Last.fm plays with Jellyfin.
+  Scrobble Libre.fm plays with Jellyfin.
 category: "Music"
-owner: "danielfariati"
+owner: "moisespr123"
 artifacts:
-  - "Jellyfin.Plugin.Lastfm.dll"
+  - "Jellyfin.Plugin.Libre.dll"
 changelog: >
   Manifest tools updated to danielfariati/jellyfin-utilities
